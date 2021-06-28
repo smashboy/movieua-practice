@@ -46,6 +46,7 @@ export default async function saveEmbedImage(
 
     res.status(200).json(response);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error });
   }
 }
