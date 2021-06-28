@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import formidable from "formidable";
 import stream from "stream";
 import { storage } from "../../firebase";
+import multer from "multer";
+// import nextConnect from "next-connect";
 
 export type SaveEmbedImageReturnType = {
   imageURL: string;
@@ -12,6 +14,14 @@ export const config = {
     bodyParser: false,
   },
 };
+
+export const multerUpload = multer({
+  storage: multer.memoryStorage(),
+});
+
+// export interface UploadReq extends NextApiRequest {
+//   file: Express.Multer.File;
+// }
 
 const imageWriteStream = (
   fileName: string,
@@ -39,15 +49,51 @@ const getImage = (req: NextApiRequest): Promise<string | null> =>
   new Promise((resolve, reject) => {
     const form = formidable({ multiples: true });
 
-    form.parse(req, (error, _, files) => {
+    form.parse(req, (error, fields, files) => {
       if (error) {
         console.log("FORM ERROR", error);
         return reject(error);
       }
-      console.log("YAS", files);
-      resolve(files?.file.toString() || null);
+      console.log(fields, files);
+      resolve(fields.file.toString());
     });
   });
+
+// const handler = nextConnect()
+//   .use(multerUpload.single("file"))
+//   .post(async (req: UploadReq, res: NextApiResponse) => {
+//     try {
+//       const fileName = req.query.fileName as string;
+
+//       console.log(req.headers);
+
+//       console.log("HELLO!!?!");
+
+//       console.log("FUCKIN FILE", req.file);
+
+//       if (!fileName) return res.status(404).end();
+
+//       const imageString = null;
+
+//       if (!imageString)
+//         return res.status(200).json({
+//           imageURL: "",
+//         });
+
+//       const imageURL = await imageWriteStream(fileName, imageString);
+
+//       const response: SaveEmbedImageReturnType = {
+//         imageURL: "",
+//       };
+
+//       res.status(200).json(response);
+//     } catch (error) {
+//       console.error(error?.message);
+//       res.status(500).json({ error });
+//     }
+//   });
+
+// export default handler;
 
 export default async function saveEmbedImage(
   req: NextApiRequest,
@@ -60,8 +106,6 @@ export default async function saveEmbedImage(
 
     const imageString = await getImage(req);
 
-    console.log("IMAGE STRING", imageString);
-
     if (!imageString)
       return res.status(200).json({
         imageURL: "",
@@ -70,12 +114,12 @@ export default async function saveEmbedImage(
     const imageURL = await imageWriteStream(fileName, imageString);
 
     const response: SaveEmbedImageReturnType = {
-      imageURL: "",
+      imageURL: imageURL,
     };
 
     res.status(200).json(response);
   } catch (error) {
-    console.error(error);
+    console.error(error?.message);
     res.status(500).json({ error });
   }
 }

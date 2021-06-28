@@ -46,7 +46,7 @@ export default async function generateEmbed(
     const data = await page.screenshot({
       type: "png",
     });
-    await browser.close();
+    // await browser.close();
 
     // Set the s-maxage property which caches the images then on the Vercel edge
     // res.setHeader("Cache-Control", "s-maxage=31536000, stale-while-revalidate");
@@ -58,21 +58,24 @@ export default async function generateEmbed(
     const body = new NodeFormData();
     body.append("file", data.toString("base64"));
 
-    const imageResponse = await axios.post<SaveEmbedImageReturnType>(
+    const imageResponse = await fetch(
       getAbsoluteURL(`/api/save-embed-image?${imageSearchParams.toString()}`),
       {
-        data: body,
-        headers: { "Content-Type": "multipart/form-data" },
+        // @ts-ignore
+        body,
+        method: "POST",
       }
     );
 
+    const imageData: SaveEmbedImageReturnType = await imageResponse.json();
+
     const response: GenerateEmbedReturnType = {
-      image: imageResponse.data.imageURL,
+      image: imageData.imageURL,
     };
 
     res.status(200).json(response);
   } catch (error) {
-    console.error(error);
+    console.error(error?.message);
     res.status(500).json({ error });
   }
 }
