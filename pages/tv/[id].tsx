@@ -122,7 +122,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     title: details.data.original_name,
     description: details.data.overview,
     url: getAbsoluteURL(`/tv/${id}`),
-    embedPreview: embed.data.image,
+    embedPreview: embed.data.image || "",
     posterURL: `${movieDbConfig.images.secure_base_url}${movieDbConfig.images.poster_sizes[3]}${details.data.poster_path}`,
     rating: details.data.vote_average,
     genres: details.data.genres.map(
