@@ -1,36 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
-// import chromium from "chrome-aws-lambda";
-// import playwright from "playwright-core";
-import playwright from "playwright-aws-lambda";
-import stream from "stream";
+import chromium from "chrome-aws-lambda";
+import playwright from "playwright-core";
 import { getAbsoluteURL } from "../../utils";
-import { storage } from "../../firebase";
+import axios from "axios";
+import { SaveEmbedImageReturnType } from "./save-embed-image";
 
 export type GenerateEmbedReturnType = {
   image: string;
 };
-
-const imageWriteStream = (
-  fileName: string,
-  dataString: string
-): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const imageFile = storage.file(fileName);
-
-    const bufferStream = new stream.PassThrough();
-    bufferStream.end(Buffer.from(dataString, "base64"));
-
-    bufferStream
-      .pipe(
-        imageFile.createWriteStream({
-          metadata: {
-            contentType: "image/png",
-          },
-        })
-      )
-      .on("error", (error) => reject(error))
-      .on("finish", () => resolve(imageFile.publicUrl()));
-  });
 
 export default async function generateEmbed(
   req: NextApiRequest,
@@ -42,8 +19,14 @@ export default async function generateEmbed(
 
     if (!id || !variant) return res.status(404).end();
 
+    const execPath = await chromium.executablePath;
+
     // Start the browser with the AWS Lambda wrapper (chrome-aws-lambda)
-    const browser = await playwright.launchChromium({ headless: true });
+    const browser = await playwright.chromium.launch({
+      args: chromium.args,
+      executablePath: execPath,
+      headless: chromium.headless,
+    });
 
     // Create a page with the Open Graph image size best practise
     const page = await browser.newPage({
@@ -68,13 +51,16 @@ export default async function generateEmbed(
     res.setHeader("Cache-Control", "s-maxage=31536000, stale-while-revalidate");
     res.setHeader("Content-Type", "image/png");
 
-    const imageURL = await imageWriteStream(
-      `embed-${variant}-${id}.png`,
-      data.toString("base64")
+    const imageSearchParams = new URLSearchParams();
+    imageSearchParams.set("imageString", data.toString("base64"));
+    imageSearchParams.set("fileName", `embed-${variant}-${id}.png`);
+
+    const imageResponse = await axios.get<SaveEmbedImageReturnType>(
+      getAbsoluteURL(`/api/save-embed-image?${imageSearchParams.toString()}`)
     );
 
     const response: GenerateEmbedReturnType = {
-      image: imageURL,
+      image: imageResponse.data.imageURL,
     };
 
     res.status(200).json(response);
