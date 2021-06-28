@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import multiparty from "multiparty";
 import formidable from "formidable";
 import stream from "stream";
 import { storage } from "../../firebase";
