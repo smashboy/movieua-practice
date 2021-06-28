@@ -82,8 +82,6 @@ export default async function generateEmbed(
       image: imageURL,
     };
 
-    console.log("EMBED", response);
-
     res.status(200).json(response);
   } catch (error) {
     console.error(error);
