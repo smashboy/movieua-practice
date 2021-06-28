@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import chromium from "chrome-aws-lambda";
-import playwright from "playwright-core";
+// import chromium from "chrome-aws-lambda";
+// import playwright from "playwright-core";
+import playwright from "playwright-aws-lambda";
 import stream from "stream";
 import { getAbsoluteURL } from "../../utils";
 import { storage } from "../../firebase";
@@ -41,14 +42,8 @@ export default async function generateEmbed(
 
     if (!id || !variant) return res.status(404).end();
 
-    const execPath = await chromium.executablePath;
-
     // Start the browser with the AWS Lambda wrapper (chrome-aws-lambda)
-    const browser = await playwright.chromium.launch({
-      args: chromium.args,
-      executablePath: execPath,
-      headless: chromium.headless,
-    });
+    const browser = await playwright.launchChromium({ headless: true });
 
     // Create a page with the Open Graph image size best practise
     const page = await browser.newPage({
