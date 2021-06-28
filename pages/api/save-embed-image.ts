@@ -36,6 +36,8 @@ export default async function saveEmbedImage(
     const imageString = req.query.imageString as string;
     const fileName = req.query.fileName as string;
 
+    console.log("EMBED SAVE INITIATED", fileName);
+
     if (!imageString) return res.status(404).end();
 
     const imageURL = await imageWriteStream(fileName, imageString);
