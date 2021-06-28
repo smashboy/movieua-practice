@@ -53,6 +53,8 @@ export default async function generateEmbed(
       image: data.toString("base64"),
     };
 
+    console.log("EMBED", response);
+
     res.status(200).json(response);
   } catch (error) {
     console.error(error);
