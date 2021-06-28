@@ -52,11 +52,16 @@ export default async function generateEmbed(
     // res.setHeader("Content-Type", "image/png");
 
     const imageSearchParams = new URLSearchParams();
-    imageSearchParams.set("imageString", data.toString("base64"));
     imageSearchParams.set("fileName", `embed-${variant}-${id}.png`);
 
+    const body = new FormData();
+    body.append("image", data.toString("base64"));
+
     const imageResponse = await axios.get<SaveEmbedImageReturnType>(
-      getAbsoluteURL(`/api/save-embed-image?${imageSearchParams.toString()}`)
+      getAbsoluteURL(`/api/save-embed-image?${imageSearchParams.toString()}`),
+      {
+        data: body,
+      }
     );
 
     const response: GenerateEmbedReturnType = {
@@ -65,8 +70,7 @@ export default async function generateEmbed(
 
     res.status(200).json(response);
   } catch (error) {
-    console.log("FUCKIN FUCK");
-    console.error(error?.message);
+    console.error(error);
     res.status(500).json({ error });
   }
 }

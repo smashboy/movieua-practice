@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import formidable from "formidable";
 import stream from "stream";
 import { storage } from "../../firebase";
 
@@ -28,15 +29,28 @@ const imageWriteStream = (
       .on("finish", () => resolve(imageFile.publicUrl()));
   });
 
+const getImage = (req: NextApiRequest): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const form = new formidable.IncomingForm();
+
+    form.parse(req, (error, _, files) => {
+      if (error) return reject(error);
+      resolve(files.image.toString());
+    });
+  });
+
 export default async function saveEmbedImage(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   try {
-    const imageString = req.query.imageString as string;
     const fileName = req.query.fileName as string;
 
-    console.log("EMBED SAVE INITIATED", fileName);
+    if (!fileName) return res.status(404).end();
+
+    const imageString = await getImage(req);
+
+    console.log("IMAAAGE YYAAAS", imageString);
 
     if (!imageString) return res.status(404).end();
 
@@ -48,7 +62,7 @@ export default async function saveEmbedImage(
 
     res.status(200).json(response);
   } catch (error) {
-    console.error(error?.message);
+    console.error(error);
     res.status(500).json({ error });
   }
 }
