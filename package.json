@@ -13,6 +13,7 @@
     "axios": "^0.21.1",
     "chrome-aws-lambda": "^10.0.0",
     "clsx": "^1.1.1",
+    "firebase-admin": "^9.10.0",
     "next": "11.0.1",
     "next-seo": "^4.26.0",
     "playwright-core": "^1.12.3",

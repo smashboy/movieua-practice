@@ -1,11 +1,35 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import chromium from "chrome-aws-lambda";
 import playwright from "playwright-core";
+import stream from "stream";
 import { getAbsoluteURL } from "../../utils";
+import { storage } from "../../firebase";
 
 export type GenerateEmbedReturnType = {
   image: string;
 };
+
+const imageWriteStream = (
+  fileName: string,
+  dataString: string
+): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const imageFile = storage.file(fileName);
+
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(Buffer.from(dataString, "base64"));
+
+    bufferStream
+      .pipe(
+        imageFile.createWriteStream({
+          metadata: {
+            contentType: "image/png",
+          },
+        })
+      )
+      .on("error", (error) => reject(error))
+      .on("finish", () => resolve(imageFile.publicUrl()));
+  });
 
 export default async function generateEmbed(
   req: NextApiRequest,
@@ -35,7 +59,7 @@ export default async function generateEmbed(
     });
 
     // Generate the full URL out of the given path (GET parameter)
-    const embedURL = getAbsoluteURL(`/${variant}/embed/${id}`);
+    const embedURL = getAbsoluteURL(`/embed/${variant}/${id}`);
 
     await page.goto(embedURL, {
       timeout: 15 * 1000,
@@ -49,8 +73,13 @@ export default async function generateEmbed(
     res.setHeader("Cache-Control", "s-maxage=31536000, stale-while-revalidate");
     res.setHeader("Content-Type", "image/png");
 
+    const imageURL = await imageWriteStream(
+      `embed-${variant}-${id}.png`,
+      data.toString("base64")
+    );
+
     const response: GenerateEmbedReturnType = {
-      image: `data:image/png;base64,${data.toString("base64")}`,
+      image: imageURL,
     };
 
     console.log("EMBED", response);
