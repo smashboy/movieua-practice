@@ -1,4 +1,5 @@
 import axios from "axios";
+import { MovieType } from "./pages/api/discover-movies";
 import { TvType } from "./pages/api/discover-tv";
 import { DiscoverItemType, ReviewType, SeasonType } from "./types";
 
@@ -43,6 +44,18 @@ export const parseTV = (
     rating: vote_average,
   }));
 
+export const parseMovies = (
+  list: Array<MovieType>,
+  config: { baseURL: string; posterSize: string }
+): Array<DiscoverItemType> =>
+  list.map(({ id, original_title, overview, poster_path, vote_average }) => ({
+    id,
+    title: original_title,
+    description: overview,
+    posterURL: `${config.baseURL}${config.posterSize}${poster_path}`,
+    rating: vote_average,
+  }));
+
 export const parseImages = (
   images: Array<{ file_path: string }>,
   config: { baseURL: string; backdropSize: string }
@@ -52,6 +65,20 @@ export const parseImages = (
   if (!image) return null;
   return `${config.baseURL}${config.backdropSize}${image.file_path}`;
 };
+
+export const parseVideos = (
+  videos: Array<{ type: String; key: string; site: string }>
+): string | null =>
+  videos
+    .filter(
+      (video: { type: String; key: string; site: string }) =>
+        (video.type === "Teaser" || video.type === "Trailer") &&
+        video.site === "YouTube"
+    )
+    .map(
+      (video: { type: String; key: string }) =>
+        `https://www.youtube.com/watch?v=${video.key}`
+    )[0] || null;
 
 export const random = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min)) + min;

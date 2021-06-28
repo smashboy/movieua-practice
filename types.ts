@@ -39,3 +39,9 @@ export type SeasonType = {
 export type TVPropsType = {
   seasons: Array<SeasonType>;
 };
+
+export type MoviePropsType = {
+  recommended: Array<DiscoverItemType>;
+};
+
+export type SectionSelectorType = "recommended" | "watch" | "reviews";

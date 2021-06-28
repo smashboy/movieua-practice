@@ -21,7 +21,7 @@ export default function ReviewCard(props: ReviewType) {
           height={125}
           className="rounded-full"
         />
-        <div className="flex justify-center w-full">
+        <div className="flex justify-center items-center w-full">
           <StarIcon color="gold" />
           <span className="ml-2 text-white">{`${rating} / 10`}</span>
         </div>

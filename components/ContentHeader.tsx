@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { FaPlay as PlayIcon, FaStar as StarIcon } from "react-icons/fa";
 
-export default function ContenderHeader(props: {
+export default function ContentHeader(props: {
   title: string;
   description: string;
   rating: number;
