@@ -80,68 +80,63 @@ export default function TVPage(props: TvMoviePagePropsType & TVPropsType) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const id = (context.params?.id as string) || null;
+  const id = (context.params?.id as string) || null;
 
-    if (!id)
-      return {
-        notFound: true,
-      };
+  if (!id)
+    return {
+      notFound: true,
+    };
 
-    const searchParams = new URLSearchParams();
-    searchParams.set("id", id);
-    searchParams.set("variant", "movie");
+  const searchParams = new URLSearchParams();
+  searchParams.set("id", id);
+  searchParams.set("variant", "movie");
 
-    const embed = await axios.get<GenerateEmbedReturnType>(
-      getAbsoluteURL(`/api/generate-embed?${searchParams.toString()}`)
+  const embed = await axios.get<GenerateEmbedReturnType>(
+    getAbsoluteURL(`/api/generate-embed?${searchParams.toString()}`)
+  );
+
+  const movieDbConfig = await getMovieDbConfiguration();
+
+  const details = await axios.get(getMovieDbEndpoint(`/tv/${id}`));
+  const images = await axios.get(getMovieDbEndpoint(`/tv/${id}/images`));
+  const videos = await axios.get(getMovieDbEndpoint(`/tv/${id}/videos`));
+
+  const seasons: Array<SeasonType> = [];
+
+  for (const seasonData of details.data.seasons) {
+    const seasonEndpoint = getMovieDbEndpoint(
+      `/tv/${id}/season/${seasonData.season_number}`
     );
 
-    const movieDbConfig = await getMovieDbConfiguration();
+    const season = await axios.get(seasonEndpoint);
 
-    const details = await axios.get(getMovieDbEndpoint(`/tv/${id}`));
-    const images = await axios.get(getMovieDbEndpoint(`/tv/${id}/images`));
-    const videos = await axios.get(getMovieDbEndpoint(`/tv/${id}/videos`));
-
-    const seasons: Array<SeasonType> = [];
-
-    for (const seasonData of details.data.seasons) {
-      const seasonEndpoint = getMovieDbEndpoint(
-        `/tv/${id}/season/${seasonData.season_number}`
-      );
-
-      const season = await axios.get(seasonEndpoint);
-
-      seasons.push(
-        parseSeason(season.data, {
-          baseURL: movieDbConfig.images.secure_base_url,
-          stillSize: movieDbConfig.images.still_sizes[2],
-        })
-      );
-    }
-
-    const props: TvMoviePagePropsType & TVPropsType = {
-      title: details.data.original_name,
-      description: details.data.overview,
-      url: getAbsoluteURL(`/tv/${id}`),
-      embedPreview: embed.data.image || "",
-      posterURL: `${movieDbConfig.images.secure_base_url}${movieDbConfig.images.poster_sizes[3]}${details.data.poster_path}`,
-      rating: details.data.vote_average,
-      genres: details.data.genres.map(
-        (genre: { name: string }) => genre.name as string
-      ),
-      videoURL: parseVideos(videos.data.results),
-      backdrop: parseImages(images.data.backdrops, {
+    seasons.push(
+      parseSeason(season.data, {
         baseURL: movieDbConfig.images.secure_base_url,
-        backdropSize: movieDbConfig.images.backdrop_sizes[2],
-      }),
-      seasons,
-    };
-
-    return {
-      props,
-    };
-  } catch (error) {
-    console.error(error?.response?.data);
-    throw new Error(error);
+        stillSize: movieDbConfig.images.still_sizes[2],
+      })
+    );
   }
+
+  const props: TvMoviePagePropsType & TVPropsType = {
+    title: details.data.original_name,
+    description: details.data.overview,
+    url: getAbsoluteURL(`/tv/${id}`),
+    embedPreview: embed.data.image || "",
+    posterURL: `${movieDbConfig.images.secure_base_url}${movieDbConfig.images.poster_sizes[3]}${details.data.poster_path}`,
+    rating: details.data.vote_average,
+    genres: details.data.genres.map(
+      (genre: { name: string }) => genre.name as string
+    ),
+    videoURL: parseVideos(videos.data.results),
+    backdrop: parseImages(images.data.backdrops, {
+      baseURL: movieDbConfig.images.secure_base_url,
+      backdropSize: movieDbConfig.images.backdrop_sizes[2],
+    }),
+    seasons,
+  };
+
+  return {
+    props,
+  };
 };
