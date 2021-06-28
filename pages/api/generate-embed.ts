@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import chromium from "chrome-aws-lambda";
 import playwright from "playwright-core";
+import NodeFormData from "form-data";
 import { getAbsoluteURL } from "../../utils";
 import axios from "axios";
 import { SaveEmbedImageReturnType } from "./save-embed-image";
@@ -54,7 +55,7 @@ export default async function generateEmbed(
     const imageSearchParams = new URLSearchParams();
     imageSearchParams.set("fileName", `embed-${variant}-${id}.png`);
 
-    const body = new FormData();
+    const body = new NodeFormData();
     body.append("image", data.toString("base64"));
 
     const imageResponse = await axios.get<SaveEmbedImageReturnType>(
