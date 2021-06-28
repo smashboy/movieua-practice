@@ -50,7 +50,7 @@ export default async function generateEmbed(
     res.setHeader("Content-Type", "image/png");
 
     const response: GenerateEmbedReturnType = {
-      image: data.toString("base64"),
+      image: `data:image/png;base64,${data.toString("base64")}`,
     };
 
     console.log("EMBED", response);
