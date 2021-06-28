@@ -13,7 +13,8 @@ export default function MovieEmbed(props: EmbedPreviewType) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const id = (context.params?.id as string) || null;
+  const id = (context.query?.id as string) || null;
+  const variant = (context.query?.variant as string) || null;
 
   if (!id)
     return {
@@ -22,11 +23,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const movieDbConfig = await getMovieDbConfiguration();
 
-  const details = await axios.get(getMovieDbEndpoint(`/movie/${id}`));
-  const images = await axios.get(getMovieDbEndpoint(`/movie/${id}/images`));
+  const details = await axios.get(getMovieDbEndpoint(`/${variant}/${id}`));
+  const images = await axios.get(
+    getMovieDbEndpoint(`/${variant}/${id}/images`)
+  );
 
   const props: EmbedPreviewType = {
-    title: details.data.original_title,
+    title: details.data.original_title || details.data.original_name || "",
     description: details.data.overview || "",
     posterURL: `${movieDbConfig.images.secure_base_url}${movieDbConfig.images.poster_sizes[3]}${details.data.poster_path}`,
     rating: details.data.vote_average,
