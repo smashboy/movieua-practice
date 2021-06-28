@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useState } from "react";
-import DiscoverAnimation from "../components/DiscoverAnimation";
+import TabContentAnimation from "../components/TabContentAnimation";
 import DiscoverMovies from "../components/DiscoverMovies";
 import DiscoverTV from "../components/DiscoverTV";
 
@@ -17,7 +17,7 @@ export default function Home() {
           <button
             onClick={() => setSelectedDiscover("movies")}
             className={clsx(
-              "text-white py-2 px-4 bg-gray-900 rounded-md transition duration-150 transform-gpu",
+              "text-white py-2 px-4 outline-none bg-gray-900 rounded-md transition duration-150 transform-gpu",
               selectedDiscover === "movies" && "bg-red-600 scale-110"
             )}
           >
@@ -26,19 +26,19 @@ export default function Home() {
           <button
             onClick={() => setSelectedDiscover("tv")}
             className={clsx(
-              "ml-4 text-white py-2 px-4 bg-gray-900 rounded-md transition duration-150 transform-gpu",
+              "ml-4 text-white py-2 px-4 outline-none bg-gray-900 rounded-md transition duration-150 transform-gpu",
               selectedDiscover === "tv" && "bg-red-600 scale-110"
             )}
           >
             TV
           </button>
         </div>
-        <DiscoverAnimation show={selectedDiscover === "movies"}>
+        <TabContentAnimation show={selectedDiscover === "movies"}>
           <DiscoverMovies />
-        </DiscoverAnimation>
-        <DiscoverAnimation show={selectedDiscover === "tv"}>
+        </TabContentAnimation>
+        <TabContentAnimation show={selectedDiscover === "tv"}>
           <DiscoverTV />
-        </DiscoverAnimation>
+        </TabContentAnimation>
       </div>
     </div>
   );

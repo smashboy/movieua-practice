@@ -75,6 +75,7 @@ export const parseReviews = (
 export const parseSeason = (
   season: {
     season_number: number;
+    name: string;
     episodes: Array<{
       name: string;
       episode_number: number;
@@ -83,10 +84,11 @@ export const parseSeason = (
   },
   config: { baseURL: string; stillSize: string }
 ): SeasonType => ({
-  seasonNumber: season.season_number,
+  name: season.name,
+  number: season.season_number,
   episodes: season.episodes.map((episode) => ({
     name: episode.name,
-    episodeNumber: episode.episode_number,
+    number: episode.episode_number,
     stillURL: `${config.baseURL}${config.stillSize}${episode.still_path}`,
   })),
 });

@@ -36,7 +36,7 @@ export default function ContenderHeader(props: {
             </div>
           ))}
         </div>
-        <button className="text-white flex items-center bg-red-600 py-2 px-4 rounded-md mt-4 transition duration-150 transform-gpu hover:scale-110">
+        <button className="text-white outline-none flex items-center bg-red-600 py-2 px-4 rounded-md mt-4 transition duration-150 transform-gpu hover:scale-110">
           <PlayIcon className="mr-2" />
           Watch
         </button>

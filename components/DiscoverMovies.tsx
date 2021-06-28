@@ -17,7 +17,7 @@ export default function DiscoverMovies() {
             <DiscoverCard key={movie.id} {...movie} />
           ))} */}
         {data?.movies.map((movie) => (
-          <DiscoverCard variant="movie" key={movie.id} {...movie} />
+          <DiscoverCard key={movie.id} variant="movie" {...movie} />
         ))}
       </DiscoverGrid>
     </DataLoader>

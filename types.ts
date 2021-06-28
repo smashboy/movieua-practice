@@ -22,17 +22,18 @@ export type TvMoviePagePropsType = {
   genres: Array<string>;
   videoURL: string | null;
   backdrop: string | null;
-  reviews: Array<ReviewType>;
-  recommended: Array<DiscoverItemType>;
+};
+
+export type EpisodeType = {
+  name: string;
+  number: number;
+  stillURL: string;
 };
 
 export type SeasonType = {
-  seasonNumber: number;
-  episodes: Array<{
-    name: string;
-    episodeNumber: number;
-    stillURL: string;
-  }>;
+  number: number;
+  name: string;
+  episodes: Array<EpisodeType>;
 };
 
 export type TVPropsType = {

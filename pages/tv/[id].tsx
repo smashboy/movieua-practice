@@ -4,13 +4,16 @@ import {
   getMovieDbConfiguration,
   getMovieDbEndpoint,
   parseImages,
-  parseReviews,
   parseSeason,
-  parseTV,
 } from "../../utils";
 import { SeasonType, TvMoviePagePropsType, TVPropsType } from "../../types";
-import ContenderHeader from "../../components/ContentHeader";
+import ContentHeader from "../../components/ContentHeader";
 import SeasonContent from "../../components/SeasonContent";
+import { useState } from "react";
+import TabContentAnimation from "../../components/TabContentAnimation";
+import clsx from "clsx";
+import RecommendedTV from "../../components/RecommendedTV";
+import ReviewsTV from "../../components/ReviewsTV";
 
 export default function TVPage(props: TvMoviePagePropsType & TVPropsType) {
   const {
@@ -24,9 +27,13 @@ export default function TVPage(props: TvMoviePagePropsType & TVPropsType) {
     seasons,
   } = props;
 
+  const [selectedSection, setSelectedSection] = useState<
+    "recommended" | "watch" | "reviews"
+  >("watch");
+
   return (
     <>
-      <ContenderHeader
+      <ContentHeader
         title={title}
         description={description}
         genres={genres}
@@ -34,9 +41,48 @@ export default function TVPage(props: TvMoviePagePropsType & TVPropsType) {
         videoURL={videoURL}
         rating={rating}
       />
-      {seasons.map((season) => (
-        <SeasonContent key={season.seasonNumber} {...season} />
-      ))}
+      <div className="flex w-full justify-center mt-10">
+        <button
+          onClick={() => setSelectedSection("watch")}
+          className={clsx(
+            "text-white py-2 px-4 outline-none bg-gray-900 rounded-md transition duration-150 transform-gpu",
+            selectedSection === "watch" && "bg-red-600 scale-110"
+          )}
+        >
+          WATCH
+        </button>
+        <button
+          onClick={() => setSelectedSection("recommended")}
+          className={clsx(
+            "text-white py-2 px-4 outline-none bg-gray-900 ml-4 rounded-md transition duration-150 transform-gpu",
+            selectedSection === "recommended" && "bg-red-600 scale-110"
+          )}
+        >
+          RECOMMENDED
+        </button>
+        <button
+          onClick={() => setSelectedSection("reviews")}
+          className={clsx(
+            "ml-4 text-white py-2 px-4 outline-none bg-gray-900 rounded-md transition duration-150 transform-gpu",
+            selectedSection === "reviews" && "bg-red-600 scale-110"
+          )}
+        >
+          REVIEWS
+        </button>
+      </div>
+      <div className="py-2 px-10">
+        <TabContentAnimation show={selectedSection === "watch"}>
+          {seasons.map((season) => (
+            <SeasonContent key={season.number} {...season} />
+          ))}
+        </TabContentAnimation>
+        <TabContentAnimation show={selectedSection === "recommended"}>
+          <RecommendedTV />
+        </TabContentAnimation>
+        <TabContentAnimation show={selectedSection === "reviews"}>
+          <ReviewsTV />
+        </TabContentAnimation>
+      </div>
     </>
   );
 }
@@ -49,19 +95,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       notFound: true,
     };
 
-  const detailsEndpoint = getMovieDbEndpoint(`/tv/${tvId}`);
-  const recommendedEndpoint = getMovieDbEndpoint(`/tv/${tvId}/recommendations`);
-  const reviewsEndpoint = getMovieDbEndpoint(`/tv/${tvId}/reviews`);
-  const imagesEndpoint = getMovieDbEndpoint(`/tv/${tvId}/images`);
-  const videosEndpoint = getMovieDbEndpoint(`/tv/${tvId}/videos`);
-
   const movieDbConfig = await getMovieDbConfiguration();
 
-  const details = await axios.get(detailsEndpoint);
-  const images = await axios.get(imagesEndpoint);
-  const videos = await axios.get(videosEndpoint);
-  const recommended = await axios.get(recommendedEndpoint);
-  const reviews = await axios.get(reviewsEndpoint);
+  const details = await axios.get(getMovieDbEndpoint(`/tv/${tvId}`));
+  const images = await axios.get(getMovieDbEndpoint(`/tv/${tvId}/images`));
+  const videos = await axios.get(getMovieDbEndpoint(`/tv/${tvId}/videos`));
 
   const seasons: Array<SeasonType> = [];
 
@@ -71,8 +109,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     );
 
     const season = await axios.get(seasonEndpoint);
-
-    console.log(season.data);
 
     seasons.push(
       parseSeason(season.data, {
@@ -102,14 +138,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     backdrop: parseImages(images.data.backdrops, {
       baseURL: movieDbConfig.images.secure_base_url,
       backdropSize: movieDbConfig.images.backdrop_sizes[2],
-    }),
-    recommended: parseTV(recommended.data.results, {
-      baseURL: movieDbConfig.images.secure_base_url,
-      posterSize: movieDbConfig.images.poster_sizes[3],
-    }),
-    reviews: parseReviews(reviews.data.results, {
-      baseURL: movieDbConfig.images.secure_base_url,
-      avatarSize: movieDbConfig.images.profile_sizes[1],
     }),
     seasons,
   };

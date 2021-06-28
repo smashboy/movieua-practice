@@ -1,12 +1,13 @@
 import { Transition } from "@headlessui/react";
 
-const DiscoverAnimation: React.FC<{ show: boolean }> = (props) => {
+const TabContentAnimation: React.FC<{ show: boolean }> = (props) => {
   const { show, children } = props;
 
   return (
     <Transition
       show={show}
-      unmount={false}
+      appear
+      unmount
       enter="transition-opacity duration-300"
       enterFrom="opacity-0"
       enterTo="opacity-100"
@@ -19,4 +20,4 @@ const DiscoverAnimation: React.FC<{ show: boolean }> = (props) => {
   );
 };
 
-export default DiscoverAnimation;
+export default TabContentAnimation;
