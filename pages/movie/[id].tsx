@@ -7,6 +7,7 @@ import {
   TvMoviePagePropsType,
 } from "../../types";
 import {
+  getAbsoluteURL,
   getMovieDbConfiguration,
   getMovieDbEndpoint,
   parseImages,
@@ -20,6 +21,9 @@ import TabContentAnimation from "../../components/TabContentAnimation";
 import DiscoverGrid from "../../components/DiscoverGrid";
 import DiscoverCard from "../../components/DiscoverCard";
 import ReviewsMovie from "../../components/ReviewsMovie";
+import Navigation from "../../components/Navigation";
+import { GenerateEmbedReturnType } from "../api/generate-embed";
+import ContentSeo from "../../components/ContentSeo";
 
 export default function MoviePage(
   props: TvMoviePagePropsType & MoviePropsType
@@ -32,6 +36,8 @@ export default function MoviePage(
     backdrop,
     videoURL,
     recommended,
+    embedPreview,
+    url,
   } = props;
 
   const [selectedSection, setSelectedSection] =
@@ -39,6 +45,13 @@ export default function MoviePage(
 
   return (
     <>
+      <ContentSeo
+        title={title}
+        description={description}
+        embedImage={embedPreview}
+        url={url}
+      />
+      <Navigation />
       <ContentHeader
         title={title}
         description={description}
@@ -76,6 +89,14 @@ export const getStaticProps: GetStaticProps = async (context) => {
       notFound: true,
     };
 
+  const searchParams = new URLSearchParams();
+  searchParams.set("id", id);
+  searchParams.set("variant", "movie");
+
+  const embed = await axios.get<GenerateEmbedReturnType>(
+    getAbsoluteURL(`/api/generate-embed?${searchParams.toString()}`)
+  );
+
   const movieDbConfig = await getMovieDbConfiguration();
 
   const details = await axios.get(getMovieDbEndpoint(`/movie/${id}`));
@@ -88,6 +109,8 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const props: TvMoviePagePropsType & MoviePropsType = {
     title: details.data.original_title,
     description: details.data.overview || "",
+    url: getAbsoluteURL(`/movie/${id}`),
+    embedPreview: embed.data.image,
     posterURL: `${movieDbConfig.images.secure_base_url}${movieDbConfig.images.poster_sizes[3]}${details.data.poster_path}`,
     rating: details.data.vote_average,
     genres: details.data.genres.map(

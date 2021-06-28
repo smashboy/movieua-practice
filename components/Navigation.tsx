@@ -3,7 +3,7 @@ import NextLink from "next/link";
 import { useState } from "react";
 import { useEffect } from "react";
 
-export function Navigation() {
+export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {

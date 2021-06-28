@@ -1,6 +1,7 @@
 import { GetServerSideProps } from "next";
 import axios from "axios";
 import {
+  getAbsoluteURL,
   getMovieDbConfiguration,
   getMovieDbEndpoint,
   parseImages,
@@ -20,16 +21,35 @@ import TabContentAnimation from "../../components/TabContentAnimation";
 import RecommendedTV from "../../components/RecommendedTV";
 import ReviewsTV from "../../components/ReviewsTV";
 import SectionSelector from "../../components/SectionSelectror";
+import Navigation from "../../components/Navigation";
+import { GenerateEmbedReturnType } from "../api/generate-embed";
+import ContentSeo from "../../components/ContentSeo";
 
 export default function TVPage(props: TvMoviePagePropsType & TVPropsType) {
-  const { title, description, rating, genres, backdrop, videoURL, seasons } =
-    props;
+  const {
+    title,
+    description,
+    rating,
+    genres,
+    backdrop,
+    videoURL,
+    seasons,
+    embedPreview,
+    url,
+  } = props;
 
   const [selectedSection, setSelectedSection] =
     useState<SectionSelectorType>("watch");
 
   return (
     <>
+      <ContentSeo
+        title={title}
+        description={description}
+        embedImage={embedPreview}
+        url={url}
+      />
+      <Navigation />
       <ContentHeader
         title={title}
         description={description}
@@ -67,6 +87,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       notFound: true,
     };
 
+  const searchParams = new URLSearchParams();
+  searchParams.set("id", id);
+  searchParams.set("variant", "movie");
+
+  const embed = await axios.get<GenerateEmbedReturnType>(
+    getAbsoluteURL(`/api/generate-embed?${searchParams.toString()}`)
+  );
+
   const movieDbConfig = await getMovieDbConfiguration();
 
   const details = await axios.get(getMovieDbEndpoint(`/tv/${id}`));
@@ -93,6 +121,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const props: TvMoviePagePropsType & TVPropsType = {
     title: details.data.original_name,
     description: details.data.overview,
+    url: getAbsoluteURL(`/tv/${id}`),
+    embedPreview: embed.data.image,
     posterURL: `${movieDbConfig.images.secure_base_url}${movieDbConfig.images.poster_sizes[3]}${details.data.poster_path}`,
     rating: details.data.vote_average,
     genres: details.data.genres.map(

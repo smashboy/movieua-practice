@@ -6,6 +6,10 @@ export type DiscoverItemType = {
   rating: number;
 };
 
+export type EmbedPreviewType = Omit<DiscoverItemType, "id"> & {
+  backdrop: string | null;
+};
+
 export type ReviewType = {
   username: string;
   avatarURL: string | null;
@@ -17,11 +21,13 @@ export type ReviewType = {
 export type TvMoviePagePropsType = {
   title: string;
   description: string;
+  url: string;
   posterURL: string;
   rating: number;
   genres: Array<string>;
   videoURL: string | null;
   backdrop: string | null;
+  embedPreview: string;
 };
 
 export type EpisodeType = {
