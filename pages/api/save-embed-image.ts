@@ -1,10 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import multiparty from "multiparty";
 import formidable from "formidable";
 import stream from "stream";
 import { storage } from "../../firebase";
 
 export type SaveEmbedImageReturnType = {
   imageURL: string;
+};
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
 };
 
 const imageWriteStream = (
@@ -29,13 +36,17 @@ const imageWriteStream = (
       .on("finish", () => resolve(imageFile.publicUrl()));
   });
 
-const getImage = (req: NextApiRequest): Promise<string> =>
+const getImage = (req: NextApiRequest): Promise<string | null> =>
   new Promise((resolve, reject) => {
-    const form = new formidable.IncomingForm();
+    const form = formidable({ multiples: true });
 
     form.parse(req, (error, _, files) => {
-      if (error) return reject(error);
-      resolve(files.image.toString());
+      if (error) {
+        console.log("FORM ERROR", error);
+        return reject(error);
+      }
+      console.log("YAS", files);
+      resolve(files?.file.toString() || null);
     });
   });
 
@@ -50,14 +61,17 @@ export default async function saveEmbedImage(
 
     const imageString = await getImage(req);
 
-    console.log("IMAAAGE YYAAAS", imageString);
+    console.log("IMAGE STRING", imageString);
 
-    if (!imageString) return res.status(404).end();
+    if (!imageString)
+      return res.status(200).json({
+        imageURL: "",
+      });
 
     const imageURL = await imageWriteStream(fileName, imageString);
 
     const response: SaveEmbedImageReturnType = {
-      imageURL,
+      imageURL: "",
     };
 
     res.status(200).json(response);

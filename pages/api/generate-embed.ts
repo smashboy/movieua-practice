@@ -56,12 +56,13 @@ export default async function generateEmbed(
     imageSearchParams.set("fileName", `embed-${variant}-${id}.png`);
 
     const body = new NodeFormData();
-    body.append("image", data.toString("base64"));
+    body.append("file", data.toString("base64"));
 
-    const imageResponse = await axios.get<SaveEmbedImageReturnType>(
+    const imageResponse = await axios.post<SaveEmbedImageReturnType>(
       getAbsoluteURL(`/api/save-embed-image?${imageSearchParams.toString()}`),
       {
         data: body,
+        headers: { "Content-Type": "multipart/form-data" },
       }
     );
 
