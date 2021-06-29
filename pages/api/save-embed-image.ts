@@ -62,12 +62,11 @@ const getImage = (req: NextApiRequest): Promise<string | null> =>
   new Promise((resolve, reject) => {
     const form = formidable({ multiples: true });
 
-    form.parse(req, (error, fields, files) => {
+    form.parse(req, (error, fields) => {
       if (error) {
         console.log("FORM ERROR", error);
         return reject(error);
       }
-      console.log(fields, files);
       resolve(fields.file.toString());
     });
   });
