@@ -6,15 +6,17 @@ export default function ContentSeo(props: {
   embedImage: string;
   url: string;
 }) {
-  const { title, description, url, embedImage } = props;
+  let { title, description, url, embedImage } = props;
+
+  title = `${title} | MOVIEUA`;
 
   return (
     <NextSeo
-      title={`${title} | MOVIEUA`}
+      title={title}
       description={description}
       twitter={{
         cardType: "summary_large_image",
-        site: "@smashboyhere"
+        site: "@smashboyhere",
       }}
       openGraph={{
         url,
@@ -28,7 +30,7 @@ export default function ContentSeo(props: {
             url: embedImage,
             width: 1200,
             height: 630,
-            alt: `${title} | MOVIEUA`,
+            alt: title,
           },
         ],
       }}
