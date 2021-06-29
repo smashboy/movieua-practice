@@ -29,7 +29,7 @@ const imageWriteStream = (
   dataString: string
 ): Promise<string> =>
   new Promise((resolve, reject) => {
-    const imageFile = storage.file(`/embeds/${folder}/${fileName}`);
+    const imageFile = storage.file(`embeds/${folder}/${fileName}`);
 
     const bufferStream = new stream.PassThrough();
     bufferStream.end(Buffer.from(dataString, "base64"));
@@ -46,7 +46,11 @@ const imageWriteStream = (
       .on("finish", async () => {
         try {
           const isImagePublic = await imageFile.isPublic();
-          if (!isImagePublic) await imageFile.makePublic();
+          if (!isImagePublic[0]) await imageFile.makePublic();
+
+          // const metadata = await imageFile.getMetadata();
+          // const mediaLink = metadata[0].mediaLink;
+
           resolve(imageFile.publicUrl());
         } catch (error) {
           reject(error);

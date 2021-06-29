@@ -3,7 +3,6 @@ import chromium from "chrome-aws-lambda";
 import playwright from "playwright-core";
 import NodeFormData from "form-data";
 import { getAbsoluteURL } from "../../utils";
-import axios from "axios";
 import { SaveEmbedImageReturnType } from "./save-embed-image";
 
 export type GenerateEmbedReturnType = {
@@ -46,7 +45,7 @@ export default async function generateEmbed(
     const data = await page.screenshot({
       type: "png",
     });
-    // await browser.close();
+    await browser.close();
 
     // Set the s-maxage property which caches the images then on the Vercel edge
     // res.setHeader("Cache-Control", "s-maxage=31536000, stale-while-revalidate");

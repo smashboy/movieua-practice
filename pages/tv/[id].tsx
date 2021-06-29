@@ -89,7 +89,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const searchParams = new URLSearchParams();
   searchParams.set("id", id);
-  searchParams.set("variant", "movie");
+  searchParams.set("variant", "tv");
 
   const embed = await axios.get<GenerateEmbedReturnType>(
     getAbsoluteURL(`/api/generate-embed?${searchParams.toString()}`)
