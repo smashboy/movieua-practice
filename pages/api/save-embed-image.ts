@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import formidable from "formidable";
 import stream from "stream";
 import { storage } from "../../firebase";
-import multer from "multer";
+// import multer from "multer";
 // import nextConnect from "next-connect";
 
 export type SaveEmbedImageReturnType = {
@@ -15,9 +15,9 @@ export const config = {
   },
 };
 
-export const multerUpload = multer({
-  storage: multer.memoryStorage(),
-});
+// export const multerUpload = multer({
+//   storage: multer.memoryStorage(),
+// });
 
 // export interface UploadReq extends NextApiRequest {
 //   file: Express.Multer.File;
@@ -25,10 +25,11 @@ export const multerUpload = multer({
 
 const imageWriteStream = (
   fileName: string,
+  folder: string,
   dataString: string
 ): Promise<string> =>
   new Promise((resolve, reject) => {
-    const imageFile = storage.file(fileName);
+    const imageFile = storage.file(`/embeds/${folder}/${fileName}`);
 
     const bufferStream = new stream.PassThrough();
     bufferStream.end(Buffer.from(dataString, "base64"));
@@ -42,7 +43,15 @@ const imageWriteStream = (
         })
       )
       .on("error", (error) => reject(error))
-      .on("finish", () => resolve(imageFile.publicUrl()));
+      .on("finish", async () => {
+        try {
+          const isImagePublic = await imageFile.isPublic();
+          if (!isImagePublic) await imageFile.makePublic();
+          resolve(imageFile.publicUrl());
+        } catch (error) {
+          reject(error);
+        }
+      });
   });
 
 const getImage = (req: NextApiRequest): Promise<string | null> =>
@@ -101,8 +110,9 @@ export default async function saveEmbedImage(
 ) {
   try {
     const fileName = req.query.fileName as string;
+    const variant = req.query.variant as string;
 
-    if (!fileName) return res.status(404).end();
+    if (!fileName || !variant) return res.status(404).end();
 
     const imageString = await getImage(req);
 
@@ -111,7 +121,7 @@ export default async function saveEmbedImage(
         imageURL: "",
       });
 
-    const imageURL = await imageWriteStream(fileName, imageString);
+    const imageURL = await imageWriteStream(fileName, variant, imageString);
 
     const response: SaveEmbedImageReturnType = {
       imageURL: imageURL,

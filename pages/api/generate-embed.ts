@@ -41,7 +41,7 @@ export default async function generateEmbed(
     const embedURL = getAbsoluteURL(`/embed/${variant}/${id}`);
 
     await page.goto(embedURL, {
-      timeout: 15 * 1000,
+      waitUntil: "networkidle",
     });
     const data = await page.screenshot({
       type: "png",
@@ -53,6 +53,7 @@ export default async function generateEmbed(
     // res.setHeader("Content-Type", "image/png");
 
     const imageSearchParams = new URLSearchParams();
+    imageSearchParams.set("variant", variant);
     imageSearchParams.set("fileName", `embed-${variant}-${id}.png`);
 
     const body = new NodeFormData();
