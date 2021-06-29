@@ -12,12 +12,17 @@ export default function ContentSeo(props: {
     <NextSeo
       title={`${title} | MOVIEUA`}
       description={description}
+      twitter={{
+        cardType: "summary_large_image",
+        site: "@smashboyhere"
+      }}
       openGraph={{
         url,
         title,
         description,
         site_name: "MOVIEUA",
         locale: "en_US",
+        type: "website",
         images: [
           {
             url: embedImage,
