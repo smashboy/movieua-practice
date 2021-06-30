@@ -26,17 +26,17 @@ export default function Embed(props: EmbedPreviewType) {
         </div>
         <div className="flex flex-wrap items-start w-full">
           <div className="w-full flex items-center">
-            <div className="text-white text-8xl font-bold h-auto">{title}</div>
-            <div className="flex items-center justify-center ml-5 pt-5">
-              <StarIcon color="gold" />
-              <span className="ml-2 text-white">{`${rating} / 10`}</span>
-            </div>
+            <div className="text-white text-4xl font-bold h-auto">{title}</div>
           </div>
           <div
             className="text-gray-400 overflow-ellipsis overflow-hidden w-full mt-4"
             style={{ maxHeight: 120 }}
           >
             {description}
+          </div>
+          <div className="flex items-center justify-end ml-5 pt-5 mr-4 w-full">
+            <StarIcon color="gold" />
+            <span className="ml-2 text-white">{`${rating} / 10`}</span>
           </div>
         </div>
       </div>
